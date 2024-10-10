@@ -229,9 +229,10 @@ export default function Component() {
                       className="w-full h-full mb-4 rounded-lg object-cover"
                     />
                     <div className="max-w-md  p-4 w-full">
-                    <h2 className="text-lg font-semibold">
-                      <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
-                      Final Report</span>
+                      <h2 className="text-lg font-semibold">
+                        <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
+                          Final Report
+                        </span>
                       </h2>
                       <div className="flex justify-around items-center mt-2">
                         <div className="flex items-center">
@@ -255,7 +256,15 @@ export default function Component() {
   );
 }
 
-function ChapterSelector({ subject, chapters, onSelect }: { subject: string, chapters: string[], onSelect: (chapter: string) => void }) {
+function ChapterSelector({
+  subject,
+  chapters,
+  onSelect,
+}: {
+  subject: string;
+  chapters: string[];
+  onSelect: (chapter: string) => void;
+}) {
   const getChapterColor = (subject: string) => {
     switch (subject) {
       case 'Math':
@@ -370,13 +379,24 @@ function QuestionDisplay({
                 }`}
                 disabled={showExplanation}
               >
-                {option.label}. {option.option}
+                {option.label.toUpperCase()}. {option.option}
               </button>
             ))}
           </div>
           {showExplanation && (
             <div className="mb-4">
-              <h3 className="font-semibold">Explanation:</h3>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                Correct Answer: {currentQuestion.correctAnswers.map((answer, index) => (
+                  <span className = "font-bold" key={answer}>{index > 0 ? ', ' : ''}{answer.toUpperCase()}</span>
+                ))}
+              </div>
+              <h3 className="font-semibold mt-2">Explanation:</h3>
               <p>{currentQuestion.explanation}</p>
             </div>
           )}
