@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import FlipClockCountdown from '@leenguyen/react-flip-clock-countdown';
 import '@leenguyen/react-flip-clock-countdown/dist/index.css';
@@ -130,16 +130,33 @@ export default function Component() {
     setTimerStart(null);
   };
 
+  // Handle retry button click
+  const handleRetry = () => {
+    setSelectedSubject(null);
+    setSelectedChapter(null);
+    setChapters([]);
+    setQuestions([]);
+    setShowTimer(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setTimerStart(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-center relative">
+        <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
           {(selectedSubject || selectedChapter || questions.length > 0) && (
             <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
               <ChevronLeft className="h-6 w-6" />
             </button>
           )}
-          <h1 className="text-xl font-bold">Skillify</h1>
+          <h1 className="mx-auto text-xl font-bold">Skillify</h1>
+          {correctCount + wrongCount === 10 && (
+            <button onClick={handleRetry} className="text-white" aria-label="Retry">
+              <RefreshCw className="h-6 w-6" />
+            </button>
+          )}
         </div>
         <div className="p-4">
           {showTimer && timerStart && questions.length > 0 && (
@@ -220,7 +237,7 @@ export default function Component() {
                   setShowTimer={setShowTimer}
                 />
               )}
-              {correctCount + wrongCount > 0 && questions.length === 0 && (
+              {correctCount + wrongCount === 10 && questions.length === 0 && (
                 <div className="text-center mt-8">
                   <div className="flex flex-col items-center">
                     <img
@@ -228,7 +245,7 @@ export default function Component() {
                       alt="Done And Done GIF"
                       className="w-full h-full mb-4 rounded-lg object-cover"
                     />
-                    <div className="max-w-md  p-4 w-full">
+                    <div className="max-w-md p-4 w-full">
                       <h2 className="text-lg font-semibold">
                         <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
                           Final Report
@@ -393,7 +410,7 @@ function QuestionDisplay({
                 }}
               >
                 Correct Answer: {currentQuestion.correctAnswers.map((answer, index) => (
-                  <span className = "font-bold" key={answer}>{index > 0 ? ', ' : ''}{answer.toUpperCase()}</span>
+                  <span className="font-bold" key={answer}>{index > 0 ? ', ' : ''}{answer.toUpperCase()}</span>
                 ))}
               </div>
               <h3 className="font-semibold mt-2">Explanation:</h3>
