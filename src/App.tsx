@@ -5,6 +5,7 @@ import FlipClockCountdown from '@leenguyen/react-flip-clock-countdown';
 import '@leenguyen/react-flip-clock-countdown/dist/index.css';
 import gifPath from './assets/done.webp';
 import './loader.css';
+import { MathJax, MathJaxContext } from 'better-react-mathjax';
 
 const subjects = ['Math', 'Physics', 'Chemistry'];
 
@@ -179,185 +180,187 @@ export default function Component() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-lg mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
-          {(selectedSubject || selectedChapter || questions.length > 0) && (
-            <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-          )}
-          <h1 className="mx-auto text-xl font-bold">Skillify</h1>
-          {quizFinished && questions.length > 0 && (
-            <button onClick={handleRetry} className="absolute right-4" aria-label="Retry">
-              <RefreshCw className="h-6 w-6" />
-            </button>
-          )}
-        </div>
-        <div className="p-4">
-          {showTimer && timerStart && questions.length > 0 && (
-            <div className="mt-2 mb-4 flex justify-center items-center">
-              <FlipClockCountdown
-                key={timerKey}
-                to={timerStart + 10 * 60 * 1000}
-                className="flip-timer"
-                renderMap={[false, false, true, true]}
-                duration={0.5}
-                style={{ margin: '0 auto', transform: 'scale(1.2)' }}
-              />
-            </div>
-          )}
-          {loading ? (
-            <div className="flex justify-center items-center">
-              <div className="loader">
-                <svg viewBox="0 0 80 80">
-                  <circle id="test" cx="40" cy="40" r="32"></circle>
-                </svg>
+    <MathJaxContext>
+      <div className="min-h-screen bg-gray-100 p-4">
+        <div className="max-w-lg mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
+            {(selectedSubject || selectedChapter || questions.length > 0) && (
+              <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            )}
+            <h1 className="mx-auto text-xl font-bold">Skillify</h1>
+            {correctCount + wrongCount === questions.length && questions.length > 0 && quizFinished && (
+              <button onClick={handleRetry} className="absolute right-4" aria-label="Retry">
+                <RefreshCw className="h-6 w-6" />
+              </button>
+            )}
+          </div>
+          <div className="p-4">
+            {showTimer && timerStart && questions.length > 0 && (
+              <div className="mt-2 mb-4 flex justify-center items-center">
+                <FlipClockCountdown
+                  key={timerKey}
+                  to={timerStart + 10 * 60 * 1000}
+                  className="flip-timer"
+                  renderMap={[false, false, true, true]}
+                  duration={0.5}
+                  style={{ margin: '0 auto', transform: 'scale(1.2)' }}
+                />
               </div>
-              <div className="loader triangle">
-                <svg viewBox="0 0 86 80">
-                  <polygon points="43 8 79 72 7 72"></polygon>
-                </svg>
+            )}
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="loader">
+                  <svg viewBox="0 0 80 80">
+                    <circle id="test" cx="40" cy="40" r="32"></circle>
+                  </svg>
+                </div>
+                <div className="loader triangle">
+                  <svg viewBox="0 0 86 80">
+                    <polygon points="43 8 79 72 7 72"></polygon>
+                  </svg>
+                </div>
+                <div className="loader">
+                  <svg viewBox="0 0 80 80">
+                    <rect x="8" y="8" width="64" height="64"></rect>
+                  </svg>
+                </div>
               </div>
-              <div className="loader">
-                <svg viewBox="0 0 80 80">
-                  <rect x="8" y="8" width="64" height="64"></rect>
-                </svg>
-              </div>
-            </div>
-          ) : (
-            <>
-              {!selectedSubject && (
-                <div>
-                  <h2 className="text-lg font-semibold mb-2">Select a Subject</h2>
-                  <div className="grid grid-cols-1 gap-2">
-                    {subjects.map((subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => handleSubjectSelect(subject)}
-                        className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
-                      >
-                        {subject}
-                      </button>
-                    ))}
+            ) : (
+              <>
+                {!selectedSubject && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2">Select a Subject</h2>
+                    <div className="grid grid-cols-1 gap-2">
+                      {subjects.map((subject) => (
+                        <button
+                          key={subject}
+                          onClick={() => handleSubjectSelect(subject)}
+                          className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
+                        >
+                          {subject}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-              {selectedSubject && !selectedChapter && chapters.length > 0 && (
-                <ChapterSelector
-                  subject={selectedSubject}
-                  chapters={chapters}
-                  onSelect={handleChapterSelect}
-                />
-              )}
-              {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
-                <div className="text-center">
-                  <button
-                    onClick={handleGenerateQuestions}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mt-4"
-                  >
-                    Generate Questions
-                  </button>
-                </div>
-              )}
-              {questions.length > 0 && !quizFinished && (
-                <QuestionDisplay
-                  questions={questions}
-                  setQuestions={setQuestions}
-                  setCorrectCount={setCorrectCount}
-                  setWrongCount={setWrongCount}
-                  correctCount={correctCount}
-                  wrongCount={wrongCount}
-                  setShowTimer={setShowTimer}
-                  handleFinishQuiz={handleFinishQuiz}
-                />
-              )}
-              {quizFinished && correctCount + wrongCount === questions.length && (
-                <div className="text-center mt-8">
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={gifPath}
-                      alt="Done And Done GIF"
-                      className="w-full h-full mb-4 rounded-lg object-cover"
-                    />
-                    <div className="max-w-xl p-6 w-full mb-4">
-                      <h2 className="text-xl font-semibold">
-                        <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
-                          Final Report
-                        </span>
-                      </h2>
-                      <div className="flex justify-around items-center mt-4">
-                        <div className="flex items-center">
-                          <CheckCircle className="text-green-500 w-5 h-5 mr-2" />
-                          <p>Correct: {correctCount}</p>
-                        </div>
-                        <div className="flex items-center">
-                          <XCircle className="text-red-500 w-5 h-5 mr-2" />
-                          <p>Wrong: {wrongCount}</p>
+                )}
+                {selectedSubject && !selectedChapter && chapters.length > 0 && (
+                  <ChapterSelector
+                    subject={selectedSubject}
+                    chapters={chapters}
+                    onSelect={handleChapterSelect}
+                  />
+                )}
+                {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
+                  <div className="text-center">
+                    <button
+                      onClick={handleGenerateQuestions}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mt-4"
+                    >
+                      Generate Questions
+                    </button>
+                  </div>
+                )}
+                {questions.length > 0 && !quizFinished && (
+                  <QuestionDisplay
+                    questions={questions}
+                    setQuestions={setQuestions}
+                    setCorrectCount={setCorrectCount}
+                    setWrongCount={setWrongCount}
+                    correctCount={correctCount}
+                    wrongCount={wrongCount}
+                    setShowTimer={setShowTimer}
+                    handleFinishQuiz={handleFinishQuiz}
+                  />
+                )}
+                {quizFinished && correctCount + wrongCount === questions.length && (
+                  <div className="text-center mt-8">
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={gifPath}
+                        alt="Done And Done GIF"
+                        className="w-full h-full mb-4 rounded-lg object-cover"
+                      />
+                      <div className="max-w-xl p-6 w-full mb-4">
+                        <h2 className="text-xl font-semibold">
+                          <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
+                            Final Report
+                          </span>
+                        </h2>
+                        <div className="flex justify-around items-center mt-4">
+                          <div className="flex items-center">
+                            <CheckCircle className="text-green-500 w-5 h-5 mr-2" />
+                            <p>Correct: {correctCount}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <XCircle className="text-red-500 w-5 h-5 mr-2" />
+                            <p>Wrong: {wrongCount}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="p-4 w-full mt-2">
-                      {questions.map((question, index) => {
-                        const selectedOption = question.options.find(
-                          (option) => option.label.toLowerCase() === question.selectedAnswer?.toLowerCase()
-                        );
+                      <div className="p-4 w-full mt-2">
+                        {questions.map((question, index) => {
+                          const selectedOption = question.options.find(
+                            (option) => option.label.toLowerCase() === question.selectedAnswer?.toLowerCase()
+                          );
 
-                        return (
-                          <div
-                            key={index}
-                            className={`mb-4 p-6 rounded-lg shadow-md ${
-                              question.selectedAnswer &&
-                              question.correctAnswers.includes(question.selectedAnswer)
-                                ? 'bg-green-100'
-                                : 'bg-red-100'
-                            }`}
-                          >
-                            <p className="font-bold mb-2 text-left">
-                              {index + 1}) {question.question}
-                            </p>
-                            <p
-                              className={`mt-2 text-left ${
+                          return (
+                            <div
+                              key={index}
+                              className={`mb-4 p-6 rounded-lg shadow-md ${
                                 question.selectedAnswer &&
                                 question.correctAnswers.includes(question.selectedAnswer)
-                                  ? 'text-green-700'
-                                  : 'text-red-700'
+                                  ? 'bg-green-100'
+                                  : 'bg-red-100'
                               }`}
                             >
-                              <span className="font-semibold">Your Answer:</span>{' '}
-                              {selectedOption
-                                ? `${selectedOption.label.toUpperCase()}. ${selectedOption.option}`
-                                : 'Not Answered'}
-                            </p>
-                            <p className="mt-2 font-semibold text-left">
-                              Correct Answer:{' '}
-                              {question.correctAnswers
-                                .map((answer) => {
-                                  const correctOption = question.options.find(
-                                    (option) => option.label.toLowerCase() === answer.toLowerCase()
-                                  );
-                                  return correctOption
-                                    ? `${correctOption.label.toUpperCase()}. ${correctOption.option}`
-                                    : answer.toUpperCase();
-                                })
-                                .join(', ')}
-                            </p>
-                            <div className="mt-2 text-gray-700 text-left">
-                              <p className="font-bold mb-1">Explanation:</p>
-                              <p>{question.explanation}</p>
+                              <p className="font-bold mb-2 text-left">
+                                {index + 1}) <MathJax>{question.question}</MathJax>
+                              </p>
+                              <p
+                                className={`mt-2 text-left ${
+                                  question.selectedAnswer &&
+                                  question.correctAnswers.includes(question.selectedAnswer)
+                                    ? 'text-green-700'
+                                    : 'text-red-700'
+                                }`}
+                              >
+                                <span className="font-semibold">Your Answer:</span>{' '}
+                                {selectedOption
+                                  ? `${selectedOption.label.toUpperCase()}. ${selectedOption.option}`
+                                  : 'Not Answered'}
+                              </p>
+                              <p className="mt-2 font-semibold text-left">
+                                Correct Answer:{' '}
+                                {question.correctAnswers
+                                  .map((answer) => {
+                                    const correctOption = question.options.find(
+                                      (option) => option.label.toLowerCase() === answer.toLowerCase()
+                                    );
+                                    return correctOption
+                                      ? `${correctOption.label.toUpperCase()}. ${correctOption.option}`
+                                      : answer.toUpperCase();
+                                  })
+                                  .join(', ')}
+                              </p>
+                              <div className="mt-2 text-gray-700 text-left">
+                                <p className="font-bold mb-1">Explanation:</p>
+                                <p><MathJax>{question.explanation}</MathJax></p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </MathJaxContext>
   );
 }
 
@@ -381,7 +384,6 @@ function QuestionDisplay({
   handleFinishQuiz: () => void;
 }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [showExplanation, setShowExplanation] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -390,7 +392,6 @@ function QuestionDisplay({
 
   const handleAnswerSelect = (label: string, index: number) => {
     setSelectedAnswer(label);
-    setShowExplanation(false);
 
     const updatedQuestions = [...questions];
     updatedQuestions[currentQuestionIndex].selectedAnswer = label;
@@ -412,11 +413,8 @@ function QuestionDisplay({
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setShowExplanation(false);
       setSelectedAnswer(null);
     } else {
-      setShowExplanation(false);
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
       setShowTimer(false);
       handleFinishQuiz();
     }
@@ -427,7 +425,7 @@ function QuestionDisplay({
       {currentQuestionIndex < questions.length ? (
         <>
           <h2 className="text-lg font-semibold mb-2">Question {currentQuestionIndex + 1}</h2>
-          <p className="mb-4">{currentQuestion.question}</p>
+          <p className="mb-4"><MathJax>{currentQuestion.question}</MathJax></p>
           <div className="grid grid-cols-1 gap-2 mb-4">
             {currentQuestion.options.map((option, index) => (
               <button
@@ -441,7 +439,7 @@ function QuestionDisplay({
                       : 'bg-red-500 text-white'
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
-                disabled={showExplanation}
+                disabled={!!selectedAnswer}
               >
                 {option.label.toUpperCase()}. {option.option}
               </button>
@@ -454,7 +452,16 @@ function QuestionDisplay({
             {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
           </button>
         </>
-      ) : null}
+      ) : (
+        <div className="mt-4 text-center">
+          <button
+            onClick={handleFinishQuiz}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Finish Quiz
+          </button>
+        </div>
+      )}
     </div>
   );
 }
