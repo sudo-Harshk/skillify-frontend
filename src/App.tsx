@@ -201,7 +201,7 @@ export default function Component() {
               <div className="mt-2 mb-4 flex justify-center items-center">
                 <FlipClockCountdown
                   key={timerKey}
-                  to={timerStart + 10 * 60 * 1000}
+                  to={timerStart + 7 * 60 * 1000}
                   className="flip-timer"
                   renderMap={[false, false, true, true]}
                   duration={0.5}
@@ -320,32 +320,39 @@ export default function Component() {
                                   {`${index + 1}) ${question.question}`}
                                 </MathJax>
                               </p>
-                              <p
-                                className={`mt-2 text-left ${
+                              <p className={`mt-2 text-left ${
                                   question.selectedAnswer &&
                                   question.correctAnswers.includes(question.selectedAnswer)
-                                    ? 'text-green-700'
-                                    : 'text-red-700'
+                                  ? 'text-green-700'
+                                  : 'text-red-700'
                                 }`}
                               >
-                                <span className="font-semibold">Your Answer:</span>{' '}
-                                {selectedOption
-                                  ? `${selectedOption.label.toUpperCase()}. ${selectedOption.option}`
-                                  : 'Not Answered'}
+                              <span className="font-bold">Your Answer:</span>{' '}
+                              {selectedOption ? (
+                              <>
+                                <span className="font-bold italic">[ {selectedOption.label.toUpperCase()} ]</span>{' '}
+                                <span className="font-bold italic">{selectedOption.option}</span>
+                              </>) : ( 'Not Answered' )}
                               </p>
+
                               <p className="mt-2 font-semibold text-left">
                                 Correct Answer:{' '}
-                                {question.correctAnswers
-                                  .map((answer) => {
-                                    const correctOption = question.options.find(
-                                      (option) => option.label.toLowerCase() === answer.toLowerCase()
-                                    );
-                                    return correctOption
-                                      ? `${correctOption.label.toUpperCase()}. ${correctOption.option}`
-                                      : answer.toUpperCase();
-                                  })
-                                  .join(', ')}
+                                {question.correctAnswers.map((answer, index) => {
+                                const correctOption = question.options.find(
+                                (option) => option.label.toLowerCase() === answer.toLowerCase()
+                                );
+
+                              return (
+                                  <span key={index}>
+                                    [ {correctOption ? correctOption.label.toUpperCase() : answer.toUpperCase()} ]{' '}
+                                  <span className="font-bold italic">
+                                    {correctOption ? correctOption.option : ''}
+                                  </span>
+                                    {index < question.correctAnswers.length - 1 && ', '}
+                                  </span> );
+                                })}
                               </p>
+
                               <div className="mt-2 text-gray-700 text-left">
                                 <p className="font-bold mb-1">Explanation:</p>
                                 <p><MathJax>{question.explanation}</MathJax></p>
