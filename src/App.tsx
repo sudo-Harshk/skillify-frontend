@@ -4,13 +4,10 @@ import axios from 'axios';
 import FlipClockCountdown from '@leenguyen/react-flip-clock-countdown';
 import '@leenguyen/react-flip-clock-countdown/dist/index.css';
 import gifPath from './assets/done.webp';
-
-// Add the loader CSS (converted from SCSS) to your project and import it
-import './loader.css'; // This is where the SCSS converted to CSS should be saved
+import './loader.css';
 
 const subjects = ['Math', 'Physics', 'Chemistry'];
 
-// Define the types for Question with an additional 'selectedAnswer'
 type Question = {
   question: string;
   options: { label: string; option: string }[];
@@ -18,260 +15,6 @@ type Question = {
   explanation: string;
   selectedAnswer?: string | null;
 };
-
-export default function Component() {
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
-  const [chapters, setChapters] = useState<string[]>([]);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showTimer, setShowTimer] = useState(false);
-  const [timerKey, setTimerKey] = useState(0); // To reset the timer
-  const [correctCount, setCorrectCount] = useState<number>(0);
-  const [wrongCount, setWrongCount] = useState<number>(0);
-  const [timerStart, setTimerStart] = useState<number | null>(null);
-
-  // Fetch chapters when a subject is selected
-  useEffect(() => {
-    const fetchChapters = async () => {
-      if (selectedSubject) {
-        setLoading(true);
-        try {
-          const response = await axios.get(`https://skillify-backend.vercel.app/subjects/${selectedSubject}/chapters`);
-          setChapters(response.data);
-        } catch (error) {
-          console.error('Error fetching chapters:', error);
-          alert('There was an error fetching chapters. Please try again later.');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    fetchChapters();
-  }, [selectedSubject]);
-
-  // Handle subject selection
-  const handleSubjectSelect = (subject: string) => {
-    setSelectedSubject(subject);
-    setSelectedChapter(null);
-    setChapters([]);
-    setQuestions([]);
-    setShowTimer(false);
-    setCorrectCount(0);
-    setWrongCount(0);
-    setTimerStart(null);
-  };
-
-  // Handle chapter selection
-  const handleChapterSelect = (chapter: string) => {
-    setSelectedChapter(chapter);
-    setQuestions([]);
-    setShowTimer(false);
-    setCorrectCount(0);
-    setWrongCount(0);
-    setTimerStart(null);
-  };
-
-  // Handle question generation
-  const handleGenerateQuestions = async () => {
-    if (selectedSubject && selectedChapter) {
-      setQuestions([]);
-      setLoading(true);
-      try {
-        const response = await axios.post('https://skillify-backend.vercel.app/questions/generate', {
-          subject: selectedSubject,
-          chapter: selectedChapter,
-        });
-
-        console.log('Questions fetched:', response.data);
-
-        const questionsArray = response.data.questions;
-
-        if (!questionsArray || questionsArray.length === 0) {
-          console.error('No questions returned from the API');
-          alert('Unable to generate questions at this time. Please try again.');
-          setShowTimer(false);
-          return;
-        }
-
-        const formattedQuestions = questionsArray.map((question: any) => ({
-          question: question.question.replace(/^\*?\d+[:.]?\s*/, '').replace(/Question:\s*/, '').replace(/\*\*/g, ''),
-          options: question.options,
-          correctAnswers: question.correctAnswers,
-          explanation: question.explanation.replace(/\*\*/g, '').replace(/^Explanation:\s*/, ''),
-        }));
-
-        setQuestions(formattedQuestions);
-        setShowTimer(true);
-        if (!timerStart) {
-          setTimerStart(Date.now()); // Start the timer only once
-          setTimerKey((prevKey) => prevKey + 1); // Reset the timer
-        }
-      } catch (error) {
-        console.error('Error generating questions:', error);
-        alert('There was an error generating questions. Please try again later.');
-        setShowTimer(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  // Handle back button navigation
-  const handleBack = () => {
-    if (questions.length > 0) {
-      setQuestions([]);
-    } else if (selectedChapter) {
-      setSelectedChapter(null);
-    } else if (selectedSubject) {
-      setSelectedSubject(null);
-    }
-    setShowTimer(false);
-    setTimerStart(null);
-  };
-
-  // Handle retry button click
-  const handleRetry = () => {
-    setSelectedSubject(null);
-    setSelectedChapter(null);
-    setChapters([]);
-    setQuestions([]);
-    setShowTimer(false);
-    setCorrectCount(0);
-    setWrongCount(0);
-    setTimerStart(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
-          {(selectedSubject || selectedChapter || questions.length > 0) && (
-            <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-          )}
-          <h1 className="mx-auto text-xl font-bold">Skillify</h1>
-          {correctCount + wrongCount === 10 && (
-            <button onClick={handleRetry} className="text-white" aria-label="Retry">
-              <RefreshCw className="h-6 w-6" />
-            </button>
-          )}
-        </div>
-        <div className="p-4">
-          {showTimer && timerStart && questions.length > 0 && (
-            <div className="mt-2 mb-4 flex justify-center items-center">
-              <FlipClockCountdown
-                key={timerKey} // Reset the timer
-                to={timerStart + 10 * 60 * 1000}
-                className="flip-timer"
-                renderMap={[false, false, true, true]}
-                duration={0.5}
-                style={{ margin: '0 auto', transform: 'scale(1.2)' }}
-              />
-            </div>
-          )}
-          {loading ? (
-            <div className="flex justify-center items-center">
-              <div className="loader">
-                <svg viewBox="0 0 80 80">
-                  <circle id="test" cx="40" cy="40" r="32"></circle>
-                </svg>
-              </div>
-
-              <div className="loader triangle">
-                <svg viewBox="0 0 86 80">
-                  <polygon points="43 8 79 72 7 72"></polygon>
-                </svg>
-              </div>
-
-              <div className="loader">
-                <svg viewBox="0 0 80 80">
-                  <rect x="8" y="8" width="64" height="64"></rect>
-                </svg>
-              </div>
-            </div>
-          ) : (
-            <>
-              {!selectedSubject && (
-                <div>
-                  <h2 className="text-lg font-semibold mb-2">Select a Subject</h2>
-                  <div className="grid grid-cols-1 gap-2">
-                    {subjects.map((subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => handleSubjectSelect(subject)}
-                        className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
-                      >
-                        {subject}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedSubject && !selectedChapter && chapters.length > 0 && (
-                <ChapterSelector
-                  subject={selectedSubject}
-                  chapters={chapters}
-                  onSelect={handleChapterSelect}
-                />
-              )}
-              {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
-                <div className="text-center">
-                  <button
-                    onClick={handleGenerateQuestions}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mt-4"
-                  >
-                    Generate Questions
-                  </button>
-                </div>
-              )}
-              {questions.length > 0 && (
-                <QuestionDisplay
-                  questions={questions}
-                  setQuestions={setQuestions}
-                  setCorrectCount={setCorrectCount}
-                  setWrongCount={setWrongCount}
-                  correctCount={correctCount}
-                  wrongCount={wrongCount}
-                  setShowTimer={setShowTimer}
-                />
-              )}
-              {correctCount + wrongCount === 10 && questions.length === 0 && (
-                <div className="text-center mt-8">
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={gifPath}
-                      alt="Done And Done GIF"
-                      className="w-full h-full mb-4 rounded-lg object-cover"
-                    />
-                    <div className="max-w-md p-4 w-full">
-                      <h2 className="text-lg font-semibold">
-                        <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
-                          Final Report
-                        </span>
-                      </h2>
-                      <div className="flex justify-around items-center mt-2">
-                        <div className="flex items-center">
-                          <CheckCircle className="text-green-500 w-5 h-5 mr-2" />
-                          <p>Correct: {correctCount}</p>
-                        </div>
-                        <div className="flex items-center">
-                          <XCircle className="text-red-500 w-5 h-5 mr-2" />
-                          <p>Wrong: {wrongCount}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function ChapterSelector({
   subject,
@@ -313,6 +56,311 @@ function ChapterSelector({
   );
 }
 
+export default function Component() {
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
+  const [timerKey, setTimerKey] = useState(0);
+  const [correctCount, setCorrectCount] = useState<number>(0);
+  const [wrongCount, setWrongCount] = useState<number>(0);
+  const [timerStart, setTimerStart] = useState<number | null>(null);
+  const [quizFinished, setQuizFinished] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      if (selectedSubject) {
+        setLoading(true);
+        try {
+          const response = await axios.get(`https://skillify-backend.vercel.app/subjects/${selectedSubject}/chapters`);
+          setChapters(response.data);
+        } catch (error) {
+          console.error('Error fetching chapters:', error);
+          alert('There was an error fetching chapters. Please try again later.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchChapters();
+  }, [selectedSubject]);
+
+  const handleSubjectSelect = (subject: string) => {
+    setSelectedSubject(subject);
+    setSelectedChapter(null);
+    setChapters([]);
+    setQuestions([]);
+    setShowTimer(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setTimerStart(null);
+    setQuizFinished(false);
+  };
+
+  const handleChapterSelect = (chapter: string) => {
+    setSelectedChapter(chapter);
+    setQuestions([]);
+    setShowTimer(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setTimerStart(null);
+    setQuizFinished(false);
+  };
+
+  const handleGenerateQuestions = async () => {
+    if (selectedSubject && selectedChapter) {
+      setQuestions([]);
+      setLoading(true);
+      try {
+        const response = await axios.post('https://skillify-backend.vercel.app/questions/generate', {
+          subject: selectedSubject,
+          chapter: selectedChapter,
+        });
+
+        const questionsArray = response.data.questions;
+
+        if (!questionsArray || questionsArray.length === 0) {
+          alert('Unable to generate questions at this time. Please try again.');
+          setShowTimer(false);
+          return;
+        }
+
+        const formattedQuestions = questionsArray.map((question: any) => ({
+          question: question.question.replace(/^\*?\d+[:.]?\s*/, '').replace(/Question:\s*/, '').replace(/\*\*/g, ''),
+          options: question.options,
+          correctAnswers: question.correctAnswers,
+          explanation: question.explanation.replace(/\*\*/g, '').replace(/^Explanation:\s*/, ''),
+        }));
+
+        setQuestions(formattedQuestions);
+        setShowTimer(true);
+        if (!timerStart) {
+          setTimerStart(Date.now());
+          setTimerKey((prevKey) => prevKey + 1);
+        }
+      } catch (error) {
+        alert('There was an error generating questions. Please try again later.');
+        setShowTimer(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (questions.length > 0) {
+      setQuestions([]);
+    } else if (selectedChapter) {
+      setSelectedChapter(null);
+    } else if (selectedSubject) {
+      setSelectedSubject(null);
+    }
+    setShowTimer(false);
+    setTimerStart(null);
+    setQuizFinished(false);
+  };
+
+  const handleRetry = () => {
+    setSelectedSubject(null);
+    setSelectedChapter(null);
+    setChapters([]);
+    setQuestions([]);
+    setShowTimer(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setTimerStart(null);
+    setQuizFinished(false);
+  };
+
+  const handleFinishQuiz = () => {
+    setQuizFinished(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-lg mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
+          {(selectedSubject || selectedChapter || questions.length > 0) && (
+            <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          )}
+          <h1 className="mx-auto text-xl font-bold">Skillify</h1>
+          {quizFinished && questions.length > 0 && (
+            <button onClick={handleRetry} className="absolute right-4" aria-label="Retry">
+              <RefreshCw className="h-6 w-6" />
+            </button>
+          )}
+        </div>
+        <div className="p-4">
+          {showTimer && timerStart && questions.length > 0 && (
+            <div className="mt-2 mb-4 flex justify-center items-center">
+              <FlipClockCountdown
+                key={timerKey}
+                to={timerStart + 10 * 60 * 1000}
+                className="flip-timer"
+                renderMap={[false, false, true, true]}
+                duration={0.5}
+                style={{ margin: '0 auto', transform: 'scale(1.2)' }}
+              />
+            </div>
+          )}
+          {loading ? (
+            <div className="flex justify-center items-center">
+              <div className="loader">
+                <svg viewBox="0 0 80 80">
+                  <circle id="test" cx="40" cy="40" r="32"></circle>
+                </svg>
+              </div>
+              <div className="loader triangle">
+                <svg viewBox="0 0 86 80">
+                  <polygon points="43 8 79 72 7 72"></polygon>
+                </svg>
+              </div>
+              <div className="loader">
+                <svg viewBox="0 0 80 80">
+                  <rect x="8" y="8" width="64" height="64"></rect>
+                </svg>
+              </div>
+            </div>
+          ) : (
+            <>
+              {!selectedSubject && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-2">Select a Subject</h2>
+                  <div className="grid grid-cols-1 gap-2">
+                    {subjects.map((subject) => (
+                      <button
+                        key={subject}
+                        onClick={() => handleSubjectSelect(subject)}
+                        className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
+                      >
+                        {subject}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selectedSubject && !selectedChapter && chapters.length > 0 && (
+                <ChapterSelector
+                  subject={selectedSubject}
+                  chapters={chapters}
+                  onSelect={handleChapterSelect}
+                />
+              )}
+              {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
+                <div className="text-center">
+                  <button
+                    onClick={handleGenerateQuestions}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mt-4"
+                  >
+                    Generate Questions
+                  </button>
+                </div>
+              )}
+              {questions.length > 0 && !quizFinished && (
+                <QuestionDisplay
+                  questions={questions}
+                  setQuestions={setQuestions}
+                  setCorrectCount={setCorrectCount}
+                  setWrongCount={setWrongCount}
+                  correctCount={correctCount}
+                  wrongCount={wrongCount}
+                  setShowTimer={setShowTimer}
+                  handleFinishQuiz={handleFinishQuiz}
+                />
+              )}
+              {quizFinished && correctCount + wrongCount === questions.length && (
+                <div className="text-center mt-8">
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={gifPath}
+                      alt="Done And Done GIF"
+                      className="w-full h-full mb-4 rounded-lg object-cover"
+                    />
+                    <div className="max-w-xl p-6 w-full mb-4">
+                      <h2 className="text-xl font-semibold">
+                        <span className="relative after:absolute after:bottom-0 after:left-0 after:bg-current after:w-full after:h-[2px] after:scale-x-0 after:origin-left after:animate-underlineExpand">
+                          Final Report
+                        </span>
+                      </h2>
+                      <div className="flex justify-around items-center mt-4">
+                        <div className="flex items-center">
+                          <CheckCircle className="text-green-500 w-5 h-5 mr-2" />
+                          <p>Correct: {correctCount}</p>
+                        </div>
+                        <div className="flex items-center">
+                          <XCircle className="text-red-500 w-5 h-5 mr-2" />
+                          <p>Wrong: {wrongCount}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 w-full mt-2">
+                      {questions.map((question, index) => {
+                        const selectedOption = question.options.find(
+                          (option) => option.label.toLowerCase() === question.selectedAnswer?.toLowerCase()
+                        );
+
+                        return (
+                          <div
+                            key={index}
+                            className={`mb-4 p-6 rounded-lg shadow-md ${
+                              question.selectedAnswer &&
+                              question.correctAnswers.includes(question.selectedAnswer)
+                                ? 'bg-green-100'
+                                : 'bg-red-100'
+                            }`}
+                          >
+                            <p className="font-bold mb-2 text-left">
+                              {index + 1}) {question.question}
+                            </p>
+                            <p
+                              className={`mt-2 text-left ${
+                                question.selectedAnswer &&
+                                question.correctAnswers.includes(question.selectedAnswer)
+                                  ? 'text-green-700'
+                                  : 'text-red-700'
+                              }`}
+                            >
+                              <span className="font-semibold">Your Answer:</span>{' '}
+                              {selectedOption
+                                ? `${selectedOption.label.toUpperCase()}. ${selectedOption.option}`
+                                : 'Not Answered'}
+                            </p>
+                            <p className="mt-2 font-semibold text-left">
+                              Correct Answer:{' '}
+                              {question.correctAnswers
+                                .map((answer) => {
+                                  const correctOption = question.options.find(
+                                    (option) => option.label.toLowerCase() === answer.toLowerCase()
+                                  );
+                                  return correctOption
+                                    ? `${correctOption.label.toUpperCase()}. ${correctOption.option}`
+                                    : answer.toUpperCase();
+                                })
+                                .join(', ')}
+                            </p>
+                            <div className="mt-2 text-gray-700 text-left">
+                              <p className="font-bold mb-1">Explanation:</p>
+                              <p>{question.explanation}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function QuestionDisplay({
   questions,
   setQuestions,
@@ -321,6 +369,7 @@ function QuestionDisplay({
   correctCount,
   wrongCount,
   setShowTimer,
+  handleFinishQuiz,
 }: {
   questions: Question[];
   setQuestions: (questions: Question[]) => void;
@@ -329,6 +378,7 @@ function QuestionDisplay({
   correctCount: number;
   wrongCount: number;
   setShowTimer: (show: boolean) => void;
+  handleFinishQuiz: () => void;
 }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -340,9 +390,8 @@ function QuestionDisplay({
 
   const handleAnswerSelect = (label: string, index: number) => {
     setSelectedAnswer(label);
-    setShowExplanation(true);
+    setShowExplanation(false);
 
-    // Update the current question with the selected answer
     const updatedQuestions = [...questions];
     updatedQuestions[currentQuestionIndex].selectedAnswer = label;
     setQuestions(updatedQuestions);
@@ -351,7 +400,6 @@ function QuestionDisplay({
       setCorrectCount(correctCount + 1);
     } else {
       setWrongCount(wrongCount + 1);
-      // Add shake effect to the button
       if (buttonRefs.current[index]) {
         buttonRefs.current[index]?.classList.add('shake');
         setTimeout(() => {
@@ -367,11 +415,10 @@ function QuestionDisplay({
       setShowExplanation(false);
       setSelectedAnswer(null);
     } else {
-      // Display final report immediately after answering the last question
       setShowExplanation(false);
-      setCurrentQuestionIndex(currentQuestionIndex + 1); // Move to a state beyond the last question
-      setQuestions([]); // Clear questions to trigger the final report
-      setShowTimer(false); // Hide timer after finishing the quiz
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setShowTimer(false);
+      handleFinishQuiz();
     }
   };
 
@@ -400,31 +447,12 @@ function QuestionDisplay({
               </button>
             ))}
           </div>
-          {showExplanation && (
-            <div className="mb-4">
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                Correct Answer: {currentQuestion.correctAnswers.map((answer, index) => (
-                  <span className="font-bold" key={answer}>{index > 0 ? ', ' : ''}{answer.toUpperCase()}</span>
-                ))}
-              </div>
-              <h3 className="font-semibold mt-2">Explanation:</h3>
-              <p>{currentQuestion.explanation}</p>
-            </div>
-          )}
-          {showExplanation && (
-            <button
-              onClick={handleNextQuestion}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-            >
-              {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-            </button>
-          )}
+          <button
+            onClick={handleNextQuestion}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+          </button>
         </>
       ) : null}
     </div>
