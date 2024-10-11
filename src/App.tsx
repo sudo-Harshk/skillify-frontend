@@ -316,7 +316,9 @@ export default function Component() {
                               }`}
                             >
                               <p className="font-bold mb-2 text-left">
-                                {index + 1}) <MathJax>{question.question}</MathJax>
+                                <MathJax>
+                                  {`${index + 1}) ${question.question}`}
+                                </MathJax>
                               </p>
                               <p
                                 className={`mt-2 text-left ${
