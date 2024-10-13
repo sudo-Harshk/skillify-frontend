@@ -151,9 +151,7 @@ export default function Component() {
   };
 
   const handleBack = () => {
-    if (questions.length > 0) {
-      setQuestions([]);
-    } else if (selectedChapter) {
+    if (selectedChapter) {
       setSelectedChapter(null);
     } else if (selectedSubject) {
       setSelectedSubject(null);
@@ -184,7 +182,7 @@ export default function Component() {
       <div className="min-h-screen bg-gray-100 p-4">
         <div className="max-w-lg mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-2 pb-4 bg-blue-600 text-white flex items-center justify-between relative">
-            {(selectedSubject || selectedChapter || questions.length > 0) && (
+            {selectedChapter === null && (selectedSubject || questions.length > 0) && (
               <button onClick={handleBack} className="absolute left-4" aria-label="Go back">
                 <ChevronLeft className="h-6 w-6" />
               </button>
