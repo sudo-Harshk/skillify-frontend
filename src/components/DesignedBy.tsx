@@ -26,13 +26,13 @@ const DesignedBy: React.FC = () => {
 
       if (iteration < fullText.length) {
         iteration++;
-        timeout = setTimeout(scrambleText, 100); // Faster speed for smoother effect
+        timeout = setTimeout(scrambleText, 100); 
       } else {
         setTimeout(() => {
-          iteration = 0; // Reset after a delay for continuous effect
-          wordIndex = (wordIndex + 1) % words.length; // Move to the next word
+          iteration = 0; 
+          wordIndex = (wordIndex + 1) % words.length; 
           scrambleText();
-        }, 1000); // Pause before restarting
+        }, 4000); 
       }
     };
 
@@ -45,8 +45,8 @@ const DesignedBy: React.FC = () => {
     <p className="text-gray-600 flex items-center justify-end mt-5">
       {text} by
       <span className="inline-block relative h-6 w-16 overflow-hidden ml-2 align-middle">
-        <span className="animate-slide-up absolute inset-0 underline underline-offset-4">Nikku</span>
-        <span className="animate-slide-up-delay absolute inset-0 initial-hidden underline underline-offset-4">Harshk</span>
+        <span className="animate-slide-up absolute inset-0 underline underline-offset-4 font-bold" style={{ animationDelay: '2s' }}>Nikku</span>
+        <span className="animate-slide-up-delay absolute inset-0 initial-hidden underline underline-offset-4 font-bold" style={{ animationDelay: '4s' }}>Harshk</span>
       </span>
     </p>
   );

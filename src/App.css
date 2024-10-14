@@ -37,7 +37,6 @@
   }
 }
 
-/* CSS for animations in App.css */
 @keyframes slide-up {
   0% {
     transform: translateY(100%);
