@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import FlipClockCountdown from '@leenguyen/react-flip-clock-countdown';
@@ -6,8 +6,6 @@ import '@leenguyen/react-flip-clock-countdown/dist/index.css';
 import gifPath from './assets/done.webp';
 import './loader.css';
 import { MathJax, MathJaxContext } from 'better-react-mathjax';
-
-const subjects = ['Math', 'Physics', 'Chemistry'];
 
 type Question = {
   question: string;
@@ -17,42 +15,138 @@ type Question = {
   selectedAnswer?: string | null;
 };
 
-function ChapterSelector({
-  subject,
-  chapters,
-  onSelect,
-}: {
-  subject: string;
-  chapters: string[];
-  onSelect: (chapter: string) => void;
-}) {
-  const getChapterColor = (subject: string) => {
-    switch (subject) {
-      case 'Math':
-        return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'Physics':
-        return 'bg-pink-100 text-pink-800 hover:bg-pink-200';
-      case 'Chemistry':
-        return 'bg-[#FAD5A5] text-yellow-800 hover:bg-[#F8C471]';
-      default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+type ProgressBarProps = {
+  progress: number;
+};
+
+function ProgressBar({ progress }: ProgressBarProps) {
+  return (
+    <div className="w-full mb-4">
+      <div className="flex justify-between text-sm mb-1">
+        <span>Quiz Progress</span>
+        <span>{`${progress}%`}</span>
+      </div>
+      <div className="w-full bg-gray-300 h-2 rounded-full">
+        <div
+          className="bg-black h-full rounded-full"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+}
+
+type QuestionDisplayProps = {
+  questions: Question[];
+  setQuestions: (questions: Question[]) => void;
+  setCorrectCount: (count: number) => void;
+  setWrongCount: (count: number) => void;
+  correctCount: number;
+  wrongCount: number;
+  setShowTimer: (show: boolean) => void;
+  handleFinishQuiz: () => void;
+};
+
+function QuestionDisplay({
+  questions,
+  setQuestions,
+  setCorrectCount,
+  setWrongCount,
+  correctCount,
+  wrongCount,
+  setShowTimer,
+  handleFinishQuiz,
+}: QuestionDisplayProps) {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const totalQuestions = questions.length;
+
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleAnswerSelect = (label: string, index: number) => {
+    setSelectedAnswer(label);
+
+    const updatedQuestions = [...questions];
+    updatedQuestions[currentQuestionIndex].selectedAnswer = label;
+    setQuestions(updatedQuestions);
+
+    if (currentQuestion.correctAnswers.includes(label)) {
+      setCorrectCount(correctCount + 1);
+    } else {
+      setWrongCount(wrongCount + 1);
+      if (buttonRefs.current[index]) {
+        buttonRefs.current[index]?.classList.add('shake');
+        setTimeout(() => {
+          buttonRefs.current[index]?.classList.remove('shake');
+        }, 400);
+      }
     }
   };
 
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedAnswer(null);
+    } else {
+      setShowTimer(false);
+      handleFinishQuiz();
+    }
+  };
+
+  const progress = totalQuestions > 0 ? Math.round((currentQuestionIndex / totalQuestions) * 100) : 0;
+
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-2">Select a Chapter</h2>
-      <div className="grid grid-cols-1 gap-2">
-        {chapters.map((chapter) => (
+      <ProgressBar progress={progress} />
+      {currentQuestionIndex < totalQuestions ? (
+        <>
+          <h2 className="text-lg font-semibold mb-2">
+            Question {currentQuestionIndex + 1} of {totalQuestions}
+          </h2>
+          <p className="mb-4">
+            <MathJax>{currentQuestion.question}</MathJax>
+          </p>
+          <div className="grid grid-cols-1 gap-2 mb-4">
+            {currentQuestion.options.map((option, index) => (
+              <button
+                key={option.label}
+                ref={(el) => (buttonRefs.current[index] = el)}
+                onClick={() => handleAnswerSelect(option.label, index)}
+                className={`w-full px-4 py-3 rounded-md transition-colors text-left ${
+                  selectedAnswer === option.label
+                    ? currentQuestion.correctAnswers.includes(option.label)
+                      ? 'bg-green-500 text-white'
+                      : 'bg-red-500 text-white'
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                }`}
+                disabled={!!selectedAnswer}
+              >
+                {option.label.toUpperCase()}. {option.option}
+              </button>
+            ))}
+          </div>
           <button
-            key={chapter}
-            onClick={() => onSelect(chapter)}
-            className={`px-4 py-2 rounded-md transition-colors ${getChapterColor(subject)}`}
+            onClick={handleNextQuestion}
+            className={`bg-blue-500 text-white px-4 py-2 rounded-md transition-colors ${
+              selectedAnswer ? 'hover:bg-blue-600' : 'opacity-50 cursor-not-allowed'
+            }`}
+            disabled={!selectedAnswer}
           >
-            {chapter}
+            {currentQuestionIndex < totalQuestions - 1 ? 'Next Question' : 'Finish Quiz'}
           </button>
-        ))}
-      </div>
+        </>
+      ) : (
+        <div className="mt-4 text-center">
+          <button
+            onClick={handleFinishQuiz}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Finish Quiz
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -231,7 +325,7 @@ export default function Component() {
                   <div>
                     <h2 className="text-lg font-semibold mb-2">Select a Subject</h2>
                     <div className="grid grid-cols-1 gap-2">
-                      {subjects.map((subject) => (
+                      {['Math', 'Physics', 'Chemistry'].map((subject) => (
                         <button
                           key={subject}
                           onClick={() => handleSubjectSelect(subject)}
@@ -244,11 +338,20 @@ export default function Component() {
                   </div>
                 )}
                 {selectedSubject && !selectedChapter && chapters.length > 0 && (
-                  <ChapterSelector
-                    subject={selectedSubject}
-                    chapters={chapters}
-                    onSelect={handleChapterSelect}
-                  />
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2">Select a Chapter</h2>
+                    <div className="grid grid-cols-1 gap-2">
+                      {chapters.map((chapter) => (
+                        <button
+                          key={chapter}
+                          onClick={() => handleChapterSelect(chapter)}
+                          className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
+                        >
+                          {chapter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
                   <div className="text-center">
@@ -318,42 +421,49 @@ export default function Component() {
                                   {`${index + 1}) ${question.question}`}
                                 </MathJax>
                               </p>
-                              <p className={`mt-2 text-left ${
+                              <p
+                                className={`mt-2 text-left ${
                                   question.selectedAnswer &&
                                   question.correctAnswers.includes(question.selectedAnswer)
-                                  ? 'text-green-700'
-                                  : 'text-red-700'
+                                    ? 'text-green-700'
+                                    : 'text-red-700'
                                 }`}
                               >
-                              <span className="font-bold">Your Answer:</span>{' '}
-                              {selectedOption ? (
-                              <>
-                                <span className="font-bold italic">[ {selectedOption.label.toUpperCase()} ]</span>{' '}
-                                <span className="font-bold italic">{selectedOption.option}</span>
-                              </>) : ( 'Not Answered' )}
+                                <span className="font-bold">Your Answer:</span>{' '}
+                                {selectedOption ? (
+                                  <>
+                                    <span className="font-bold italic">[ {selectedOption.label.toUpperCase()} ]</span>{' '}
+                                    <span className="font-bold italic">{selectedOption.option}</span>
+                                  </>
+                                ) : (
+                                  'Not Answered'
+                                )}
                               </p>
 
                               <p className="mt-2 font-semibold text-left">
                                 Correct Answer:{' '}
                                 {question.correctAnswers.map((answer, index) => {
-                                const correctOption = question.options.find(
-                                (option) => option.label.toLowerCase() === answer.toLowerCase()
-                                );
+                                  const correctOption = question.options.find(
+                                    (option) => option.label.toLowerCase() === answer.toLowerCase()
+                                  );
 
-                              return (
-                                  <span key={index}>
-                                    [ {correctOption ? correctOption.label.toUpperCase() : answer.toUpperCase()} ]{' '}
-                                  <span className="font-bold italic">
-                                    {correctOption ? correctOption.option : ''}
-                                  </span>
-                                    {index < question.correctAnswers.length - 1 && ', '}
-                                  </span> );
+                                  return (
+                                    <span key={index}>
+                                      [ {correctOption ? correctOption.label.toUpperCase() : answer.toUpperCase()} ]{' '}
+                                      <span className="font-bold italic">
+                                        {correctOption ? correctOption.option : ''}
+                                      </span>
+                                      {index < question.correctAnswers.length - 1 && ', '}
+                                    </span>
+                                  );
                                 })}
                               </p>
 
                               <div className="mt-2 text-gray-700 text-left">
                                 <p className="font-bold mb-1">Explanation:</p>
-                                <p><MathJax>{question.explanation}</MathJax></p>
+                                <p>
+                                  <MathJax>{question.explanation}</MathJax>
+                                </p>
                               </div>
                             </div>
                           );
@@ -368,108 +478,5 @@ export default function Component() {
         </div>
       </div>
     </MathJaxContext>
-  );
-}
-
-function QuestionDisplay({
-  questions,
-  setQuestions,
-  setCorrectCount,
-  setWrongCount,
-  correctCount,
-  wrongCount,
-  setShowTimer,
-  handleFinishQuiz,
-}: {
-  questions: Question[];
-  setQuestions: (questions: Question[]) => void;
-  setCorrectCount: (count: number) => void;
-  setWrongCount: (count: number) => void;
-  correctCount: number;
-  wrongCount: number;
-  setShowTimer: (show: boolean) => void;
-  handleFinishQuiz: () => void;
-}) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-
-  const currentQuestion = questions[currentQuestionIndex];
-
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const handleAnswerSelect = (label: string, index: number) => {
-    setSelectedAnswer(label);
-
-    const updatedQuestions = [...questions];
-    updatedQuestions[currentQuestionIndex].selectedAnswer = label;
-    setQuestions(updatedQuestions);
-
-    if (currentQuestion.correctAnswers.includes(label)) {
-      setCorrectCount(correctCount + 1);
-    } else {
-      setWrongCount(wrongCount + 1);
-      if (buttonRefs.current[index]) {
-        buttonRefs.current[index]?.classList.add('shake');
-        setTimeout(() => {
-          buttonRefs.current[index]?.classList.remove('shake');
-        }, 400);
-      }
-    }
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
-    } else {
-      setShowTimer(false);
-      handleFinishQuiz();
-    }
-  };
-
-  return (
-    <div>
-      {currentQuestionIndex < questions.length ? (
-        <>
-          <h2 className="text-lg font-semibold mb-2">Question {currentQuestionIndex + 1}</h2>
-          <p className="mb-4"><MathJax>{currentQuestion.question}</MathJax></p>
-          <div className="grid grid-cols-1 gap-2 mb-4">
-            {currentQuestion.options.map((option, index) => (
-              <button
-                key={option.label}
-                ref={(el) => (buttonRefs.current[index] = el)}
-                onClick={() => handleAnswerSelect(option.label, index)}
-                className={`w-full px-4 py-3 rounded-md transition-colors text-left ${
-                  selectedAnswer === option.label
-                    ? currentQuestion.correctAnswers.includes(option.label)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-red-500 text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-                disabled={!!selectedAnswer}
-              >
-                {option.label.toUpperCase()}. {option.option}
-              </button>
-            ))}     
-          </div>
-          <button onClick={handleNextQuestion}
-            className={`bg-blue-500 text-white px-4 py-2 rounded-md transition-colors ${
-            selectedAnswer ? 'hover:bg-blue-600' : 'opacity-50 cursor-not-allowed' }`}
-            disabled={!selectedAnswer}
-          >
-            {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-          </button>
-        </>
-      ) : (
-        <div className="mt-4 text-center">
-          <button
-            onClick={handleFinishQuiz}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Finish Quiz
-          </button>
-        </div>
-      )}
-    </div>
   );
 }
