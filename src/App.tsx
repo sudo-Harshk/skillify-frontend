@@ -7,6 +7,7 @@ import gifPath from './assets/done.webp';
 import './loader.css';
 import './App.css';
 import { MathJax, MathJaxContext } from 'better-react-mathjax';
+import DesignedBy from './components/DesignedBy';
 
 // Question type definition
 type Question = {
@@ -503,13 +504,7 @@ export default function Component() {
                 )}
               </>
             )}
-            <p className="text-gray-600 flex items-center justify-end mt-5">
-              Designed by
-              <span className="inline-block relative h-6 w-16 overflow-hidden ml-2 align-middle">
-              <span className="animate-slide-up absolute inset-0 underline underline-offset-4">Nikku</span>
-              <span className="animate-slide-up-delay absolute inset-0 initial-hidden underline underline-offset-4">Harshk</span>
-              </span>
-            </p>
+           <DesignedBy />
           </div>
         </div>  
       </div>
