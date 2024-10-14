@@ -7,6 +7,7 @@ import gifPath from './assets/done.webp';
 import './loader.css';
 import { MathJax, MathJaxContext } from 'better-react-mathjax';
 
+// Question type definition
 type Question = {
   question: string;
   options: { label: string; option: string }[];
@@ -15,6 +16,7 @@ type Question = {
   selectedAnswer?: string | null;
 };
 
+// ProgressBar component
 type ProgressBarProps = {
   progress: number;
 };
@@ -29,13 +31,14 @@ function ProgressBar({ progress }: ProgressBarProps) {
       <div className="w-full bg-gray-300 h-2 rounded-full">
         <div
           className="bg-black h-full rounded-full"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}
         ></div>
       </div>
     </div>
   );
 }
 
+// QuestionDisplay component
 type QuestionDisplayProps = {
   questions: Question[];
   setQuestions: (questions: Question[]) => void;
@@ -95,7 +98,7 @@ function QuestionDisplay({
     }
   };
 
-  const progress = totalQuestions > 0 ? Math.round((currentQuestionIndex / totalQuestions) * 100) : 0;
+  const progress = totalQuestions > 0 ? Math.round(((currentQuestionIndex + (selectedAnswer ? 1 : 0)) / totalQuestions) * 100) : 0;
 
   return (
     <div>
@@ -151,6 +154,37 @@ function QuestionDisplay({
   );
 }
 
+// ChapterSelector component
+function ChapterSelector({ subject, chapters, onSelect }: { subject: string, chapters: string[], onSelect: (chapter: string) => void }) {
+  const getChapterColor = (subject: string) => {
+    switch (subject) {
+      case 'Math':
+        return 'bg-green-100 text-green-800 hover:bg-green-200';
+      case 'Physics':
+        return 'bg-pink-100 text-pink-800 hover:bg-pink-200';
+      case 'Chemistry':
+        return 'bg-[#FAD5A5] text-yellow-800 hover:bg-[#F8C471]';
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+    }
+  };
+
+  return (
+    <div>
+      {chapters.map((chapter) => (
+        <button
+          key={chapter}
+          onClick={() => onSelect(chapter)}
+          className={`px-4 py-2 rounded-md transition-colors ${getChapterColor(subject)} mb-2 w-full`}
+        >
+          {chapter}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Main Component
 export default function Component() {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
@@ -340,17 +374,11 @@ export default function Component() {
                 {selectedSubject && !selectedChapter && chapters.length > 0 && (
                   <div>
                     <h2 className="text-lg font-semibold mb-2">Select a Chapter</h2>
-                    <div className="grid grid-cols-1 gap-2">
-                      {chapters.map((chapter) => (
-                        <button
-                          key={chapter}
-                          onClick={() => handleChapterSelect(chapter)}
-                          className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
-                        >
-                          {chapter}
-                        </button>
-                      ))}
-                    </div>
+                    <ChapterSelector
+                      subject={selectedSubject}
+                      chapters={chapters}
+                      onSelect={handleChapterSelect}
+                    />
                   </div>
                 )}
                 {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
@@ -392,11 +420,11 @@ export default function Component() {
                         <div className="flex justify-around items-center mt-4">
                           <div className="flex items-center">
                             <CheckCircle className="text-green-500 w-5 h-5 mr-2" />
-                            <p>Correct: {correctCount}</p>
+                            <p className="text-green-700 font-bold">Correct: {correctCount}</p>
                           </div>
                           <div className="flex items-center">
                             <XCircle className="text-red-500 w-5 h-5 mr-2" />
-                            <p>Wrong: {wrongCount}</p>
+                            <p className="text-red-700 font-bold">Wrong: {wrongCount}</p>
                           </div>
                         </div>
                       </div>
