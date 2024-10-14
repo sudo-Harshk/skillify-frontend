@@ -385,12 +385,21 @@ export default function Component() {
                 )}
                 {selectedSubject && selectedChapter && questions.length === 0 && correctCount + wrongCount === 0 && (
                   <div className="text-center">
-                    <button
-                      onClick={handleGenerateQuestions}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mt-4"
-                    >
-                      Generate Questions
-                    </button>
+                    <h2 className="text-lg font-semibold mb-2">Selected Chapter: {selectedChapter}</h2>
+                    <div className="flex justify-center gap-4 mt-4">
+                      <button
+                        onClick={() => setSelectedChapter(null)}
+                        className="bg-red-100 text-red-800 px-4 py-2 rounded-md hover:bg-red-200 transition-colors"
+                      >
+                        Reselect
+                      </button>
+                      <button
+                        onClick={handleGenerateQuestions}
+                        className="bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 transition-colors"
+                      >
+                        Proceed
+                      </button>
+                    </div>
                   </div>
                 )}
                 {questions.length > 0 && !quizFinished && (
@@ -511,4 +520,3 @@ export default function Component() {
     </MathJaxContext>
   );
 }
-
