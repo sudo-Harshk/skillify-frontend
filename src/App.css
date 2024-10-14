@@ -36,3 +36,43 @@
     transform: rotate(360deg);
   }
 }
+
+/* CSS for animations in App.css */
+@keyframes slide-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 4s infinite;
+}
+
+.animate-slide-up-delay {
+  animation: slide-up 4s infinite 2s;
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.initial-hidden {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
