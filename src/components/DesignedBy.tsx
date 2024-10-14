@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import  Nikku_Avatar  from '../assets/Nikku_Avaatr.webp';
+import Harshk_Avatar from '../assets/Harshk-Avatar.webp';
+import '../DesignedBy.css';
 
 const DesignedBy: React.FC = () => {
   const [text, setText] = useState('');
+  const [visibleImageIndex, setVisibleImageIndex] = useState(0);
   const words = useMemo(() => [
     'Made', 'Built', 'Created', 'Composed', 'Hacked', 'Brewed', 'Crafted', 'Forged', 'Designed', 'Developed', 'Produced'
   ], []);
@@ -26,13 +30,13 @@ const DesignedBy: React.FC = () => {
 
       if (iteration < fullText.length) {
         iteration++;
-        timeout = setTimeout(scrambleText, 100); 
+        timeout = setTimeout(scrambleText, 100); // Faster speed for smoother effect
       } else {
         setTimeout(() => {
           iteration = 0; 
           wordIndex = (wordIndex + 1) % words.length; 
           scrambleText();
-        }, 4000); 
+        }, 4000); // Hold completed word for 4 seconds to sync with slide-up animation
       }
     };
 
@@ -41,14 +45,26 @@ const DesignedBy: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [words]);
 
+  useEffect(() => {
+    const imageInterval = setInterval(() => {
+      setVisibleImageIndex((prevIndex) => (prevIndex + 1) % 2);
+    }, 2500); 
+
+    return () => clearInterval(imageInterval);
+  }, []);
+
   return (
-    <p className="text-gray-600 flex items-center justify-end mt-5">
+    <div className="text-gray-600 flex items-center justify-end mt-5">
       {text} by
-      <span className="inline-block relative h-6 w-16 overflow-hidden ml-2 align-middle">
-        <span className="animate-slide-up absolute inset-0 underline underline-offset-4 font-bold" style={{ animationDelay: '2s' }}>Nikku</span>
-        <span className="animate-slide-up-delay absolute inset-0 initial-hidden underline underline-offset-4 font-bold" style={{ animationDelay: '4s' }}>Harshk</span>
-      </span>
-    </p>
+      <div className="ml-2">
+        <div className={`h-16 w-16 ${visibleImageIndex === 0 ? 'animate-slide-up' : 'hidden'}`}>
+          <img className="h-full w-full rounded-md object-cover object-center" src={Nikku_Avatar} alt="Nikku Avatar" />
+        </div>
+        <div className={`h-16 w-16 ${visibleImageIndex === 1 ? 'animate-slide-up' : 'hidden'}`}>
+          <img className="h-full w-full rounded-md object-cover object-center" src={Harshk_Avatar} alt="Harshk Avatar" />
+        </div>
+      </div>
+    </div>
   );
 };
 
