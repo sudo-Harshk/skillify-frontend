@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/skillify-frontend/static/css/main.7007973e.css",
-    "main.js": "/skillify-frontend/static/js/main.c61346d1.js",
+    "main.js": "/skillify-frontend/static/js/main.0c66712e.js",
     "static/js/453.68b0fcdf.chunk.js": "/skillify-frontend/static/js/453.68b0fcdf.chunk.js",
     "static/media/Nikku_Avaatr.webp": "/skillify-frontend/static/media/Nikku_Avaatr.9205f2a7665460348827.webp",
     "static/media/done.webp": "/skillify-frontend/static/media/done.e732df31758d52c9a6a1.webp",
     "static/media/Harshk-Avatar.webp": "/skillify-frontend/static/media/Harshk-Avatar.3e7ffbad0162a5715eae.webp",
     "index.html": "/skillify-frontend/index.html",
     "main.7007973e.css.map": "/skillify-frontend/static/css/main.7007973e.css.map",
-    "main.c61346d1.js.map": "/skillify-frontend/static/js/main.c61346d1.js.map",
+    "main.0c66712e.js.map": "/skillify-frontend/static/js/main.0c66712e.js.map",
     "453.68b0fcdf.chunk.js.map": "/skillify-frontend/static/js/453.68b0fcdf.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7007973e.css",
-    "static/js/main.c61346d1.js"
+    "static/js/main.0c66712e.js"
   ]
 }
