@@ -65,12 +65,17 @@ function QuestionDisplay({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex] || { correctAnswers: [], options: [] };
   const totalQuestions = questions.length;
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleAnswerSelect = (label: string, index: number) => {
+    if (!currentQuestion || !currentQuestion.correctAnswers) {
+      console.error('currentQuestion or correctAnswers is undefined');
+      return;
+    }
+
     setSelectedAnswer(label);
 
     const updatedQuestions = [...questions];
