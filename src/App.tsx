@@ -305,7 +305,19 @@ export default function Component() {
 
   const handleFinishQuiz = () => {
     setQuizFinished(true);
+    setShowTimer(false);
   };
+
+  useEffect(() => {
+    if (showTimer && timerStart) {
+      const timerEnd = timerStart + 7 * 60 * 1000;
+      const timeout = setTimeout(() => {
+        handleFinishQuiz();
+      }, timerEnd - Date.now());
+
+      return () => clearTimeout(timeout);
+    }
+  }, [showTimer, timerStart]);
 
   return (
     <MathJaxContext>
@@ -318,7 +330,7 @@ export default function Component() {
               </button>
             )}
             <h1 className="mx-auto text-xl font-bold">Skillify</h1>
-            {correctCount + wrongCount === questions.length && questions.length > 0 && quizFinished && (
+            {quizFinished && questions.length > 0 && (
               <button onClick={handleRetry} className="absolute right-4" aria-label="Retry">
                 <RefreshCw className="h-6 w-6" />
               </button>
@@ -391,7 +403,7 @@ export default function Component() {
                         onClick={() => setSelectedChapter(null)}
                         className="bg-red-100 text-red-800 px-4 py-2 rounded-md hover:bg-red-200 transition-colors"
                       >
-                        Reselect
+                        Reselect 
                       </button>
                       <button
                         onClick={handleGenerateQuestions}
@@ -414,7 +426,7 @@ export default function Component() {
                     handleFinishQuiz={handleFinishQuiz}
                   />
                 )}
-                {quizFinished && correctCount + wrongCount === questions.length && (
+                {quizFinished && (
                   <div className="text-center mt-8">
                     <div className="flex flex-col items-center">
                       <img
@@ -475,7 +487,7 @@ export default function Component() {
                                     <span className="font-bold italic">{selectedOption.option}</span>
                                   </>
                                 ) : (
-                                  'Not Answered'
+                                  <span className="font-bold italic">- Not Answered</span>
                                 )}
                               </p>
 
