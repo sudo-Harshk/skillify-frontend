@@ -2,9 +2,6 @@
 
 Skillify is a web application designed for interactive learning through quizzes. Users can select subjects like Math, Physics, and Chemistry, choose specific chapters, and test their knowledge with dynamically generated multiple-choice questions. The application features a timer, tracks scores, and provides detailed explanations for each answer, making it an effective tool for study and self-assessment.
 
-## Screenshot/GIF Placeholder
-
-*(Suggestion: Add a screenshot or GIF of the application in action here to give users a visual overview of Skillify.)*
 
 ## Features
 
@@ -100,10 +97,6 @@ Skillify utilizes an external backend service to fetch subject chapters and gene
 
 This service is responsible for providing the educational content that powers the quizzes.
 
-## Designed By
-
-The user interface includes a "Designed By" section, which is implemented in the `src/components/DesignedBy.tsx` component. This credits the creators of the application's design.
-*(Note: You may want to update this section with specific names or links if applicable.)*
 
 ## Contributing
 
@@ -117,8 +110,3 @@ Contributions are welcome! If you have suggestions for improvements or want to f
 
 Please ensure your code follows the project's coding style and that tests are updated or added as appropriate.
 
-## License
-
-This project is currently not licensed. You may want to add a license file (e.g., `LICENSE.txt`) to the project root.
-
-Consider using a common open-source license such as the [MIT License](https://opensource.org/licenses/MIT) if you wish to allow others to use, modify, and distribute your code freely, with attribution.
