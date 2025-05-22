@@ -1,4 +1,4 @@
-# Skillify
+# Skillify ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/sudo-Harshk/skillify-frontend?utm_source=oss&utm_medium=github&utm_campaign=sudo-Harshk%2Fskillify-frontend&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 Skillify is a web application designed for interactive learning through quizzes. Users can select subjects like Math, Physics, and Chemistry, choose specific chapters, and test their knowledge with dynamically generated multiple-choice questions. The application features a timer, tracks scores, and provides detailed explanations for each answer, making it an effective tool for study and self-assessment.
 
